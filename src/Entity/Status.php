@@ -3,11 +3,14 @@
 namespace App\Entity;
 
 use App\Repository\StatusRepository;
+use App\Traits\Timer;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: StatusRepository::class)]
 class Status
 {
+    use Timer;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

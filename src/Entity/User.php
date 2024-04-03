@@ -3,23 +3,35 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use App\Traits\Timer;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
-class User
+#[UniqueEntity('phone', 'Numéro existant')]
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
+    use Timer;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[ORM\CustomIdGenerator(class:'doctrine.ulid_generator')]
+    #[Groups('user', 'agent')]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups('user', 'agent')]
     private ?string $firstname = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups('user', 'agent')]
     private ?string $lastname = null;
 
     #[ORM\Column(length: 255)]
@@ -29,17 +41,27 @@ class User
     private ?string $phoneNumber = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups('user')]
     private ?string $email = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups('user')]
     private ?string $phone = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $password = null;
+
+    #[ORM\Column()]
+    #[Groups('user')]
+    private ?array $roles = [];
+
     #[ORM\OneToMany(targetEntity: UserProfil::class, mappedBy: 'UserImmo')]
-    private Collection $yes;
+    // #[Groups('user')]
+    private Collection $userProfil;
 
     public function __construct()
     {
-        $this->yes = new ArrayCollection();
+        $this->userProfil = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -122,30 +144,68 @@ class User
     /**
      * @return Collection<int, UserProfil>
      */
-    public function getYes(): Collection
+    public function getProfil(): Collection
     {
-        return $this->yes;
+        return $this->userProfil;
     }
 
-    public function addYe(UserProfil $ye): static
+    public function addProfil(UserProfil $profil): static
     {
-        if (!$this->yes->contains($ye)) {
-            $this->yes->add($ye);
-            $ye->setUserImmo($this);
+        if (!$this->userProfil->contains($profil)) {
+            $this->userProfil->add($profil);
+            $profil->setUserImmo($this);
         }
 
         return $this;
     }
 
-    public function removeYe(UserProfil $ye): static
+    public function removeProfil(UserProfil $profil): static
     {
-        if ($this->yes->removeElement($ye)) {
+        if ($this->userProfil->removeElement($profil)) {
             // set the owning side to null (unless already changed)
-            if ($ye->getUserImmo() === $this) {
-                $ye->setUserImmo(null);
+            if ($profil->getUserImmo() === $this) {
+                $profil->setUserImmo(null);
             }
         }
 
         return $this;
+    }
+
+
+    public function getPassword(): ?string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(string $password): static
+    {
+        $this->password = $password;
+
+        return $this;
+    }
+
+    public function getRoles(): array
+    {
+        return $this->roles;
+    }
+
+    public function setRoles(): array
+    {
+        $roles = $this->roles;
+        // guarantee every user at least has ROLE_USER
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
+    }
+
+    public function eraseCredentials(): void
+    {
+        // TODO: Implement eraseCredentials() method.
+    }
+
+    public function getUserIdentifier(): string
+    {
+        // TODO: Implement getUserIdentifier() method.
+        return (string) $this->phone;
     }
 }

@@ -3,12 +3,15 @@
 namespace App\Entity;
 
 use App\Repository\OfferTypeRepository;
+use App\Traits\Timer;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: OfferTypeRepository::class)]
 class OfferType
 {
+    use Timer;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

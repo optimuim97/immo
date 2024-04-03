@@ -203,3 +203,16 @@ function generatePath($path, $data)
     return $finalPath;
 
 }
+
+
+function handleData($request, $required_values = [])
+{
+    $data = json_decode($request->getContent(), true);
+    if (
+        !empty($required_values)
+    ) {
+        $errors = checkNotEmpty($data, $required_values);
+        
+        return $errors != null ? $errors : $data;
+    }
+}

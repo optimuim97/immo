@@ -3,11 +3,14 @@
 namespace App\Entity;
 
 use App\Repository\UserProfilRepository;
+use App\Traits\Timer;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: UserProfilRepository::class)]
 class UserProfil
 {
+    use Timer;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
