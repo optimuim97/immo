@@ -6,6 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 trait Timer
 {
+    #[ORM\Column]
     private ?\DateTimeImmutable $created_at = null;
 
     public function setCreatedAt(\DateTimeImmutable $created_at): static

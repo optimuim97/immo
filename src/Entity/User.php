@@ -23,15 +23,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\GeneratedValue]
     #[ORM\Column]
     #[ORM\CustomIdGenerator(class:'doctrine.ulid_generator')]
-    #[Groups('user', 'agent')]
+    #[Groups('user', 'agent', "offer")]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups('user', 'agent')]
+    #[Groups(["offer", "company"])]
     private ?string $firstname = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups('user', 'agent')]
+    #[Groups(["offer", "company"])]
     private ?string $lastname = null;
 
     #[ORM\Column(length: 255)]
@@ -41,11 +41,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $phoneNumber = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups('user')]
+    #[Groups('user','offer')]
     private ?string $email = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups('user')]
+    #[Groups(["offer", "company"])]
     private ?string $phone = null;
 
     #[ORM\Column(length: 255)]

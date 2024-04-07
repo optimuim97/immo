@@ -53,6 +53,7 @@ class Offer
     private ?string $reference = null;
 
     #[ORM\ManyToOne(inversedBy: 'offers')]
+    #[Groups(["offer"])]
     private ?Agent $agent = null;
 
     public function __construct()

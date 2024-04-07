@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: CompanyRepository::class)]
 class Company
@@ -17,20 +18,27 @@ class Company
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["offer", "company"])]
     private ?int $id = null;
+    
     #[ORM\Column(length: 255)]
+    #[Groups(["offer", "company"])]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Groups(["offer", "company"])]
     private ?string $description = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["offer", "company"])]
     private ?string $lat = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["offer", "company"])]
     private ?string $lon = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["offer", "company"])]
     private ?string $address_name = null;
 
     #[ORM\OneToMany(targetEntity: Agent::class, mappedBy: 'company')]

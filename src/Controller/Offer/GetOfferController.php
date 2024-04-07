@@ -2,15 +2,14 @@
 
 namespace App\Controller\Offer;
 
-use App\Entity\Offer;
 use App\Repository\AgentRepository;
 use App\Repository\OfferRepository;
+use Doctrine\Common\Collections\Order;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Uid\Uuid;
 
 class GetOfferController extends AbstractController
 {
@@ -24,9 +23,14 @@ class GetOfferController extends AbstractController
     #[Route('/get-offers', methods: ['GET'])]
     public function __invoke(Request $request)
     {
-        $offers = $this->offerRepo->findBy([
-            "createdAt" => "DESC"
-        ]);
+        $limit = $request->query->get('limit') ?? null;
+        $order = $request->query->get('order') ?? null;
+
+        if(!in_array(strtolower($order), ["desc", "asc"])){
+            return $this->json(["error"=> "order sense not  exist"], Response::HTTP_NOT_FOUND);
+        }
+        
+        $offers = $this->offerRepo->findBy([], ['created_at'=> "DESC"], ctype_digit($limit) ? (int) $limit : 10);
 
         return $this->json(
             responseSuccess(
@@ -37,5 +41,6 @@ class GetOfferController extends AbstractController
             Response::HTTP_OK,
             context: ['groups' => "offer"]
         );
+
     }
 }

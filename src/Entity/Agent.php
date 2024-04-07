@@ -21,12 +21,12 @@ class Agent
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'agents')]
-    #[Groups(['agent'])]
+    #[Groups(['agent', 'offer'])]
     private ?Company $company = null;
 
     #[ORM\OneToMany(targetEntity: Agent::class, mappedBy: 'User')]
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]
-    #[Groups(['agent'])]
+    #[Groups(['agent', "offer"])]
     private ?User $immoUser = null;
 
     #[ORM\OneToMany(targetEntity: Offer::class, mappedBy: 'agent')]
