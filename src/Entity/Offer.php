@@ -40,8 +40,6 @@ class Offer
     #[ORM\Column(length: 255)]
     private ?string $address_name = null;
     #[Groups(["offer"])]
-    #[ORM\Column(type: Types::TEXT)]
-    private ?string $conditions = null;
 
     private ?bool $display_status = null;
     // #[Groups(["offer"])]
@@ -56,9 +54,17 @@ class Offer
     #[Groups(["offer"])]
     private ?Agent $agent = null;
 
+    #[ORM\OneToMany(targetEntity: Conditions::class, mappedBy: 'offer')]
+    private Collection $conditions;
+
+    #[ORM\ManyToMany(targetEntity: OfferUser::class, mappedBy: 'offer')]
+    private Collection $offerUsers;
+
     public function __construct()
     {
         $this->offerStatuses = new ArrayCollection();
+        $this->conditions = new ArrayCollection();
+        $this->offerUsers = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -126,17 +132,6 @@ class Offer
         return $this;
     }
 
-    public function getConditions(): ?string
-    {
-        return $this->conditions;
-    }
-
-    public function setConditions(string $conditions): static
-    {
-        $this->conditions = $conditions;
-
-        return $this;
-    }
 
     public function getDisplayStatus(): ?string
     {
@@ -200,6 +195,63 @@ class Offer
     public function setAgent(?Agent $agent): static
     {
         $this->agent = $agent;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Conditions>
+     */
+    public function getConditions(): Collection
+    {
+        return $this->conditions;
+    }
+
+    public function addCondition(Conditions $condition): static
+    {
+        if (!$this->conditions->contains($condition)) {
+            $this->conditions->add($condition);
+            $condition->setOffer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCondition(Conditions $condition): static
+    {
+        if ($this->conditions->removeElement($condition)) {
+            // set the owning side to null (unless already changed)
+            if ($condition->getOffer() === $this) {
+                $condition->setOffer(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, OfferUser>
+     */
+    public function getOfferUsers(): Collection
+    {
+        return $this->offerUsers;
+    }
+
+    public function addOfferUser(OfferUser $offerUser): static
+    {
+        if (!$this->offerUsers->contains($offerUser)) {
+            $this->offerUsers->add($offerUser);
+            $offerUser->addOffer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOfferUser(OfferUser $offerUser): static
+    {
+        if ($this->offerUsers->removeElement($offerUser)) {
+            $offerUser->removeOffer($this);
+        }
 
         return $this;
     }

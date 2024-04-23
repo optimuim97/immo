@@ -59,9 +59,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     // #[Groups('user')]
     private Collection $userProfil;
 
+    #[ORM\ManyToMany(targetEntity: OfferUser::class, mappedBy: 'user')]
+    private Collection $offerUsers;
+
     public function __construct()
     {
         $this->userProfil = new ArrayCollection();
+        $this->offerUsers = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -207,5 +211,32 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         // TODO: Implement getUserIdentifier() method.
         return (string) $this->phone;
+    }
+
+    /**
+     * @return Collection<int, OfferUser>
+     */
+    public function getOfferUsers(): Collection
+    {
+        return $this->offerUsers;
+    }
+
+    public function addOfferUser(OfferUser $offerUser): static
+    {
+        if (!$this->offerUsers->contains($offerUser)) {
+            $this->offerUsers->add($offerUser);
+            $offerUser->addUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOfferUser(OfferUser $offerUser): static
+    {
+        if ($this->offerUsers->removeElement($offerUser)) {
+            $offerUser->removeUser($this);
+        }
+
+        return $this;
     }
 }

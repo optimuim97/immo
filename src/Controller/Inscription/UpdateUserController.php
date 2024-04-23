@@ -12,7 +12,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class UserRegisterController extends AbstractController
+class UpdateUserController extends AbstractController
 {
     public function __construct(
         private readonly EntityManagerInterface $em,
@@ -21,44 +21,28 @@ class UserRegisterController extends AbstractController
     ) {
     }
 
-    #[Route('user-register', methods: ['POST'])]
+    #[Route('update-user', methods: ['POST'])]
     public function __invoke(Request $request)
     {
         $data = json_decode($request->getContent(), true);
-        $errors = checkNotEmpty($data, [
-            "firstname",
-            "lastname",
-            "numero",
-            "password",
-            // "email"
-        ]);
 
-        if ($errors) {
-            return $this->json($errors, 422);
+        if (isset($data['dial_code']) && $data['numero']) {
+            $phone = ($data['dial_code'] ?? "225") . $data['numero'];
+            $checkPhone = Utils::validPhoneNumber($phone);
         }
-
-        $phone = ($data['dial_code'] ?? "225") . $data['numero'];
-        $checkPhone = Utils::validPhoneNumber($phone);
 
         if (!$checkPhone) {
             return $this->json(responseSuccess("Numéro Invalide", 422), 422);
         }
 
-        $user = new User();
-        $user->setFirstName($data['firstname'])
-            ->setLastname($data['lastname'])
-            ->setDialCode($data['dial_code'] ?? "225")
-            ->setPhoneNumber($data['numero'])
-            ->setPhone($phone)
-            ->setEmail($data['email'] ?? "")
-            ->setPassword( 
-                $this
-                    ->passwordHasherInterface
-                    ->hashPassword(
-                        $user,
-                        $data['password']
-                    )
-            );
+        $user = $this->getUser();
+        $user
+            ->setFirstName($data['firstname'] ?? $user->getFirstName())
+            ->setLastname($data['lastname'] ?? $user->getLastname())
+            ->setDialCode($data['dial_code'] ?? $user->getDialCode())
+            ->setPhoneNumber($data['numero'] ?? $user->getPhoneNumber())
+            ->setPhone($phone ?? $user->getPhone())
+            ->setEmail($data['email'] ?? $user->getEmail() ?? "");
 
         $errors = $this->validator->validate($user);
 
@@ -76,7 +60,6 @@ class UserRegisterController extends AbstractController
                     Response::HTTP_UNPROCESSABLE_ENTITY
                 );
             }
-
         }
 
         $this->em->persist($user);
@@ -84,7 +67,7 @@ class UserRegisterController extends AbstractController
 
         return $this->json(
             [
-                "message" => "Enregistré",
+                "message" => "Mise à jour",
                 "data" => $user,
                 "status_code" => Response::HTTP_OK
             ],
